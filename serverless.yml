@@ -1,0 +1,86 @@
+service: mcp-http-wrapper
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  memorySize: 256
+  timeout: 30
+  logRetentionInDays: 14
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    # Add other environment variables here
+  
+  # IAM permissions for your Lambda function
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "*"
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+
+custom:
+  serverlessPluginTypescript:
+    tsConfigFileLocation: './tsconfig.json'
+  
+  # Custom settings for the serverless-offline plugin
+  serverless-offline:
+    httpPort: 3000
+    noPrependStageInUrl: true
+    useChildProcesses: true
+  
+  # Webpack configuration
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    includeModules: true
+    packager: 'npm'
+    excludeFiles: src/**/*.test.ts
+
+package:
+  individually: false
+  patterns:
+    # Include patterns
+    - 'mcp_servers/**'
+    - 'dist/**'
+    - 'package.json'
+    - 'node_modules/**'  # Include node_modules for dependencies
+    # Exclude patterns
+    - '!.git/**'
+    - '!.vscode/**'
+    - '!.serverless/**'
+    - '!.gitignore'
+    - '!.DS_Store'
+    - '!npm-debug.log'
+    - '!.env'
+    - '!test/**'
+    - '!jest.config.js'
+    - '!**/*.test.ts'
+    - '!src/**'  # Exclude source files since they'll be compiled to dist
+
+functions:
+  api:
+    handler: src/index.handler
+    description: MCP HTTP wrapper function
+    events:
+      - http:
+          path: /
+          method: any
+          cors: true
+      - http:
+          path: /{serverName}
+          method: get
+          cors: true
+      - http:
+          path: /{serverName}/{toolName}
+          method: post
+          cors: true 
