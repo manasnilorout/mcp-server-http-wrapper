@@ -96,7 +96,7 @@ Required headers must be included based on the specific MCP server configuration
 ## Project Structure
 
 - `src/index.ts` - Main Lambda handler function
-- `src/mcp-server-config.ts` - Configuration for available MCP servers
+- `src/mcp/mcp-server-config.ts` - Configuration for available MCP servers
 - `src/mcp/mcp-client-handler.ts` - Handler for MCP client communications
 - `mcp_servers/` - Directory containing MCP server implementations
 - `serverless.yml` - Serverless Framework configuration
